@@ -15,34 +15,25 @@ var twit = new twitter({
 stream = null;
 
 var client = new elasticSearch.Client({
-    host: 'localhost:9200',
+    host: 'search-candidates-cjppiuv3s4xsksv4prai7gcohm.us-west-2.es.amazonaws.com',
     log: 'trace'
-});
-
-client.create({
-  index: 'myindex',
-  type: 'mytype',
-  id: '1',
-  body: {
-    title: 'Test 1',
-    tags: ['y', 'z'],
-    published: true,
-    published_at: '2013-01-01',
-    counter: 1
-  }
-}, function (error, response) {
-    console.log("INSERT. Response: " + response); 
 });
 
 //Create web sockets connection.
 twit.stream('statuses/filter', { track: ['the'] }, function(stream) {
     stream.on('data', function (data) {
         if (data.geo){
-            console.log(data);
-            client.bulk({
-                body: [
-                    { index: { _index: 'candidate', _type: 'geo_point'}}
-                ]
+            console.log(data.id + data.text);
+            client.create({
+              index: 'index',
+              type: 'mytype',
+              id: data.id,
+              body: {
+                  text: data.text,
+                  location: data.geo.coordinates
+              }
+            }, function (error, response) {
+                console.log("inserted record");
             });
         }
     });
