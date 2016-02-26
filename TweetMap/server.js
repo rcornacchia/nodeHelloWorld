@@ -1,11 +1,8 @@
 // Setup web server and socket
-var twitter = require('twitter'),
-    express = require('express'),
-    app = express(),
-    http = require('http'),
-    server = http.createServer(app),
-    io = require('socket.io').listen(server);
+var app = require('express').createServer(),
+    twitter = require('ntwitter');
 
+app.listen(3000);
 // Setup twitter stream api
 var twit = new twitter({
     consumer_key: 'cu607zV20zgS5deVCjJphwFfc',
@@ -15,13 +12,11 @@ var twit = new twitter({
 }),
 stream = null;
 
-// Use the default port (for beanstalk) or default to 8081 locally
-server.list(process.env.PORT || 8081);
-
-// Setup routing for app
-app.use(express.static(__dirname + '/public'));
-
-// Create web sockets connection
-io.sockets.on('connection', function(socket) {
-
+//Create web sockets connection.
+twit.stream('statuses/filter', { track: ['Trump'] }, function(stream) {
+    stream.on('data', function (data) {
+        // if (data.coordinates){
+                console.log(data);
+        // }
+    });
 });
