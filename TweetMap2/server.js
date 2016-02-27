@@ -11,17 +11,16 @@ var tClient = new twitter({
     access_token_secret: 'Kd9tLOi65pPcW4vqLC5X5UxbanzpHtMDi7jNAfS9uY5Rh'
 });
 
-// // Set up elasticSearch client
-// var esClient = new elasticSearch.Client({
-//     host: 'search-tweetmapccbd-fbed2pdkzapesfu7nzk4fmtmsm.us-east-1.es.amazonaws.com',
-//     log: 'trace'
-// });
+// Set up elasticSearch client
+var esClient = new elasticSearch.Client({
+    host: 'search-tweetmapccbd-fbed2pdkzapesfu7nzk4fmtmsm.us-east-1.es.amazonaws.com',
+    log: 'trace'
+});
 
 // Connect to twitter stream websocket
 var keywords = [
     'deadpool',
     'kung fu panda',
-    'risen',
     'the witch',
     'how to be single',
     'zoolander',
@@ -32,14 +31,26 @@ var keywords = [
 var params = {track:keywords.join(', ') };
 tClient.stream('statuses/filter', params, function(stream) {
     stream.on('data', function(tweet) {
-        if (tweet.geo) {
+        if (tweet.geo) { // tweet has location data
             console.log(tweet.id),
             console.log(tweet.text),
             console.log(tweet.coordinates),
             console.log("====\n");
+
+            esClient.create({
+                index: 'movies',
+                type: 'geo_point',
+                id: tweet.id,
+                body: {
+                    text: tweet.text,
+                    location: {
+                        'lat': tweet.coordinates[1],
+                        'lon': tweet.coordinates[0]
+                    }
+                }
+            }, function (error, response) {
+                console.log("tweet inserted.")
+            });
         }
-        // client.create({
-        //     index:
-        // });
     });
 });
