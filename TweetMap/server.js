@@ -20,17 +20,20 @@ var client = new elasticSearch.Client({
 });
 
 //Create web sockets connection.
-twit.stream('statuses/filter', { track: ['the'] }, function(stream) {
+twit.stream('statuses/filter', { track: ['aksdljflaksdjf'] }, function(stream) {
     stream.on('data', function (data) {
         if (data.geo){
-            console.log(data.id + data.text);
+            console.log(data.place.full_name, data.text, data.geo.coordinates[0], data.geo.coordinates[1]);
             client.create({
-              index: 'index',
-              type: 'mytype',
+              index: 'candidates',
+              type: 'geo_point',
               id: data.id,
               body: {
                   text: data.text,
-                  location: data.geo.coordinates
+                  location: {
+                      "lat": data.geo.coordinates[0],
+                      "lon": data.geo.coordinates[1]
+                  }
               }
             }, function (error, response) {
                 console.log("inserted record");
