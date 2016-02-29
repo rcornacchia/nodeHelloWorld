@@ -1,15 +1,12 @@
-// initialize elastic search connection
-// var elasticsearch = require('elasticsearch');
-// var client = new elasticsearch.Client({
-//     host: 'search-candidates-cjppiuv3s4xsksv4prai7gcohm.us-west-2.es.amazonaws.com',
-//     log: 'trace'
-// });
+// TODO
+// dropdown starts with All Candidates
+// The value of the dropdown should determine what's inside the candidates array
+// Bonus
+
+
+
 var map;
 var tweets = [];
-
-// var client = new elasticsearch.Client({
-//     hosts: 'search-candidates-cjppiuv3s4xsksv4prai7gcohm.us-west-2.es.amazonaws.com'
-// });
 
 function myCallback(data) {
     // console.log(data);
@@ -19,15 +16,17 @@ function myCallback(data) {
     }
     // console.log(tweets);
 
-    console.log("test");
+    // console.log(tweets);
     tweets.forEach(function(tweet) {
-        console.log(tweet);
-
+        // console.log(tweet);
+        //
         var position_options = {
-            lat: parseFloat(tweet[0][0]),
-            lng: parseFloat(tweet[0][1])
+            lat: parseFloat(tweet[0].lat),
+            lng: parseFloat(tweet[0].lon)
         };
-
+        // var position_options = tweet[0];
+        console.log(tweet[0].lat);
+        // console.log(position_options);
         var infowindow = new google.maps.InfoWindow({
             content: tweet[1]
         });
@@ -46,7 +45,7 @@ function myCallback(data) {
 
 function httpGetAsync(theUrl, callback)
 {
-    theUrl = "http://search-candidates-cjppiuv3s4xsksv4prai7gcohm.us-west-2.es.amazonaws.com/index/_search?pretty=true";
+    theUrl = "http://search-candidates-cjppiuv3s4xsksv4prai7gcohm.us-west-2.es.amazonaws.com/candidates2/_search?size=200";
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
@@ -105,8 +104,6 @@ function initMap() {
     //     console.trace(err.message);
     // });
 
-    // dropdown starts with All Candidates
-    // The value of the dropdown determines what's inside the candidates array
 
 
 }

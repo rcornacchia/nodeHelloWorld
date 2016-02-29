@@ -20,12 +20,12 @@ var client = new elasticSearch.Client({
 });
 
 //Create web sockets connection.
-twit.stream('statuses/filter', { track: ['aksdljflaksdjf'] }, function(stream) {
+twit.stream('statuses/filter', { track: ['Trump', 'Clinton', 'Sanders', 'Ted Cruz', 'Marco Rubio', 'Ben Carson', 'Kasich', 'Jeb Bush', 'Carly Fiorina', 'Mike Huckabee'] }, function(stream) {
     stream.on('data', function (data) {
         if (data.geo){
             console.log(data.place.full_name, data.text, data.geo.coordinates[0], data.geo.coordinates[1]);
             client.create({
-              index: 'candidates',
+              index: 'candidates2',
               type: 'geo_point',
               id: data.id,
               body: {
