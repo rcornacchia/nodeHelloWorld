@@ -52,6 +52,12 @@ tClient.stream('statuses/filter', params, function(stream) {
             });
 
         }
-        
+
     });
+});
+
+app.listen(3000)
+
+app.get('/', function(req, res) {
+    res.send('hello world.');
 });
