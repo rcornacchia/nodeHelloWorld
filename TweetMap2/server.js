@@ -19,38 +19,39 @@ var esClient = new elasticSearch.Client({
 
 // Connect to twitter stream websocket
 var keywords = [
-    'deadpool',
-    'kung fu panda',
-    'the witch',
-    'how to be single',
-    'zoolander',
-    'star wars',
-    'the revenant',
-    'hail caesar!'
+    'super tuesday',
+    'trump',
+    'clinton',
+    'GOP',
+    'democratic',
+    'republican',
+    'primary'
 ];
 var params = {track:keywords.join(', ') };
 tClient.stream('statuses/filter', params, function(stream) {
     stream.on('data', function(tweet) {
-        if (tweet.geo) { // tweet has location data
+        if (tweet.coordinates) { // tweet has location data
             console.log(tweet.id),
             console.log(tweet.text),
             console.log(tweet.coordinates),
             console.log("====\n");
 
             esClient.create({
-                index: 'movies',
+                index: 'supertuesday',
                 type: 'geo_point',
                 id: tweet.id,
                 body: {
                     text: tweet.text,
                     location: {
-                        'lat': tweet.coordinates[1],
-                        'lon': tweet.coordinates[0]
+                        'lat': tweet.coordinates.coordinates[1],
+                        'lon': tweet.coordinates.coordinates[0]
                     }
                 }
             }, function (error, response) {
                 console.log("tweet inserted.")
             });
+
         }
+        
     });
 });
