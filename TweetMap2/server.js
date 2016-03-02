@@ -72,6 +72,23 @@ app.get('/', function(req, res) {
 });
 
 app.get('/search', function(req, res) {
+    var hits = null;
     var keywords = req.query.q;
-    res.send("Searched for: " + keywords);
+    esClient.search({
+        index: 'supertuesday',
+        type: 'geo_point',
+        body: {
+            query: {
+                match: {
+                    text: keywords
+                }
+            }
+        }
+    }).then(function(resp) {
+        hits = resp.hits.hits;
+        console.log(hits);
+        res.send(hits);
+    }, function(err) {
+    console.trace(err.message);
+    });
 });

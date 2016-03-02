@@ -5,8 +5,10 @@
     <script>
     function search() {
         var keywords = document.getElementById("searchBar").value;
-        // jQuery request here
-        // to /search?q=keywords
+        $.get("/search?q=" + keywords, function(data, status){
+            console.log("received data: " + data);
+            alert("Data: " + data + "\nStatus: " + status);
+        });
     }
     </script>
 </head>
