@@ -3,6 +3,7 @@ var twitter = require('twitter'),
     elasticSearch = require('elasticsearch'),
     swig = require('swig'),
     path = require('path'),
+    morgan = require('morgan'),
     app = express();
 
 // Setup twitter api
@@ -58,11 +59,19 @@ tClient.stream('statuses/filter', params, function(stream) {
     });
 });
 
-app.listen(3000)
+app.use(express.static(path.join(__dirname, '/public')));
 app.set('views', path.join(__dirname, 'views'));
+app.use(morgan('dev'));
 app.engine('html', swig.renderFile);
 app.set('view engine', 'html');
 
+app.listen(3000)
+
 app.get('/', function(req, res) {
     res.render('index');
+});
+
+app.get('/search', function(req, res) {
+    var keywords = req.query.q;
+    res.send("Searched for: " + keywords);
 });
