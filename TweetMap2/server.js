@@ -1,6 +1,8 @@
 var twitter = require('twitter'),
     express = require('express'),
     elasticSearch = require('elasticsearch'),
+    swig = require('swig'),
+    path = require('path'),
     app = express();
 
 // Setup twitter api
@@ -57,7 +59,10 @@ tClient.stream('statuses/filter', params, function(stream) {
 });
 
 app.listen(3000)
+app.set('views', path.join(__dirname, 'views'));
+app.engine('html', swig.renderFile);
+app.set('view engine', 'html');
 
 app.get('/', function(req, res) {
-    res.send('hello world.');
+    res.render('index');
 });
