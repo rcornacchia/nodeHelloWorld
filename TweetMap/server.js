@@ -87,7 +87,6 @@ app.post('/getTweetsWithLocation', function(req,res) {
                           text: candidate
                       }
                   }
-
               }
             }, function (error, response) {
                 res.json(response);
