@@ -3,8 +3,6 @@
 // The value of the dropdown should determine what's inside the candidates array
 // Bonus
 
-
-
 var map;
 var tweets = [];
 
@@ -14,25 +12,16 @@ function myCallback(data) {
     for(var i=0; i<obj.hits.hits.length; i++){
         tweets.push([obj.hits.hits[i]._source.location, obj.hits.hits[i]._source.text]);
     }
-    // console.log(tweets);
-
-    // console.log(tweets);
     tweets.forEach(function(tweet) {
-        // console.log(tweet);
-        //
         var position_options = {
             lat: parseFloat(tweet[0].lat),
             lng: parseFloat(tweet[0].lon)
         };
-        // var position_options = tweet[0];
-        // console.log(tweet[0].lat);
-        // console.log(position_options);
         var infowindow = new google.maps.InfoWindow({
             content: tweet[1]
         });
 
         var marker = new google.maps.Marker({
-            // color marker according to candidates party
             position: position_options,
             map: map
         });
@@ -40,7 +29,6 @@ function myCallback(data) {
             infowindow.open(map, marker);
         }));
     });
-
 }
 
 function httpGetAsync(theUrl, callback)
@@ -56,12 +44,15 @@ function httpGetAsync(theUrl, callback)
 }
 
 function initMap() {
-
     httpGetAsync("test", myCallback);
     $(document.body).on('click', '.dropdown li a', function (e) {
-        console.log($(this).text());
-        // request tweets with the last name from the server
-        // should be a get route
+        console.log($(this).text())
+    });
+    $(function(){
+       $(".dropdown-menu li a").click(function(){
+         $(".btn:first-child").text($(this).text());
+         $(".btn:first-child").val($(this).text());
+      });
     });
 
     map = new google.maps.Map(document.getElementById('map'), {
@@ -86,5 +77,4 @@ function initMap() {
     // }, function (err) {
     //     console.trace(err.message);
     // });
-
 }

@@ -2,7 +2,15 @@
 var app = require('express').createServer(),
     twitter = require('ntwitter'),
     elasticSearch = require('elasticSearch');
+    // express = require('express'),
+    // app = express();
 
+
+// app.use('/static', express.static(__dirname + '/public'));
+
+// app.get('/',function(req,res){
+//     res.sendFile(__dirname + '/helloworldmap.html');
+// });
 
 app.listen(3000);
 // Setup twitter stream api
@@ -22,7 +30,7 @@ var client = new elasticSearch.Client({
 //Create web sockets connection.
 twit.stream('statuses/filter', { track: ['Trump', 'Clinton', 'Sanders', 'Ted Cruz', 'Marco Rubio', 'Ben Carson', 'Kasich', 'Jeb Bush', 'Carly Fiorina', 'Mike Huckabee'] }, function(stream) {
     stream.on('data', function (data) {
-        if (data.geo){
+        if (data.geo) {
             console.log(data.place.full_name, data.text, data.geo.coordinates[0], data.geo.coordinates[1]);
             client.create({
               index: 'candidates2',

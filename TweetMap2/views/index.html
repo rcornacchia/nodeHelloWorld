@@ -1,0 +1,38 @@
+<html>
+<head>
+    <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+    <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script>
+    function search() {
+        var keywords = document.getElementById("searchBar").value;
+
+        /*$.get("/search?q=" + keywords, function(data, status){
+            console.log("received data: " + data);
+            alert("Data: " + data + "\nStatus: " + status);
+        });*/
+
+        $.ajax({
+            dataType: "json",
+            url: "/search?q=" + keywords,
+            //type: "GET",
+            error: function(err) {
+                alert("AJAX error in request: " + JSON.stringify(err, null, 2));
+            },
+            success: function(data, status) {
+                alert("Data: " + data + "\nStatus: " + status);
+            },
+        });
+    }
+    </script>
+</head>
+<body>
+<h1>Rendered Page</h1>
+
+<form>
+    Search for: <input type="text" id="searchBar">
+    <button onclick="search()">Search</button>
+</form>
+
+<!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBYmTfTysq82Yq56eFrIw9i4jQ7c4HnJw0&libraries=places&callback=initSessionMap" async defer></script> -->
+</body>
+</html>

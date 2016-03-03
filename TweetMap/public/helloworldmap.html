@@ -19,8 +19,16 @@
           width:100%;
           /*position: absolute;*/
           /*margin: auto;*/
-          margin-top: 5px;
-          /*text-align:center;*/
+          margin: 5px;
+      }
+      .dropdown {
+          text-align:center;
+      }
+      .dropdown-menu {
+          left: 50%;
+          right: auto;
+          text-align: center;
+          transform: translate(-50%, 0);
       }
       #map {
         height: 95%;
@@ -34,7 +42,7 @@
           <span class="caret"></span></button>
           <ul class="dropdown-menu dropdown" role="menu" aria-labelledby="menu1">
               <li role="presentation"><a role="All candidates" tabindex="-1" href="#">All candidates</a></li>
-              <li role="presentation"><a role="Hillary Clinton" tabindex="-1" href="#">Hillary Clinton</a></li>
+              <li role="presentation"><a role="Hillary Clinton" tabindex="-1" href="#h">Hillary Clinton</a></li>
               <li role="presentation"><a role="Bernie Sanders" tabindex="-1" href="#">Bernie Sanders</a></li>
               <li role="presentation"><a role="Donald Trump" tabindex="-1" href="#">Donald Trump</a></li>
               <li role="presentation"><a role="Ted Cruz" tabindex="-1" href="#">Ted Cruz</a></li>
