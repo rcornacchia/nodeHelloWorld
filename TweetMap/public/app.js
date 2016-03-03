@@ -25,7 +25,7 @@ function myCallback(data) {
             lng: parseFloat(tweet[0].lon)
         };
         // var position_options = tweet[0];
-        console.log(tweet[0].lat);
+        // console.log(tweet[0].lat);
         // console.log(position_options);
         var infowindow = new google.maps.InfoWindow({
             content: tweet[1]
@@ -58,28 +58,11 @@ function httpGetAsync(theUrl, callback)
 function initMap() {
 
     httpGetAsync("test", myCallback);
-    // requirejs.config({
-    //     //By default load any module IDs from js/lib
-    //     baseUrl: 'js/lib',
-    //     //except, if the module ID starts with "app",
-    //     //load it from the js/app directory. paths
-    //     //config is relative to the baseUrl, and
-    //     //never includes a ".js" extension since
-    //     //the paths config could be for a directory.
-    //     paths: {
-    //         app: '../app'
-    //     }
-    // });
-    // requirejs(['jquery', 'canvas', 'app/sub'],
-    // function   ($,        canvas,   sub) {
-    //     //jQuery, canvas and the app/sub module are all
-    //     //loaded and can be used here now.
-    //     var client = new $.es.Client({
-    //         hosts: 'localhost:9200'
-    //     });
-    // });
-
-
+    $(document.body).on('click', '.dropdown li a', function (e) {
+        console.log($(this).text());
+        // request tweets with the last name from the server
+        // should be a get route
+    });
 
     map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: 38, lng: -97},
@@ -103,7 +86,5 @@ function initMap() {
     // }, function (err) {
     //     console.trace(err.message);
     // });
-
-
 
 }
