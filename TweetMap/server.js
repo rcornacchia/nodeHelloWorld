@@ -1,18 +1,57 @@
 // Setup web server and socket
-var app = require('express').createServer(),
+var express = require('express'),
     twitter = require('ntwitter'),
-    elasticSearch = require('elasticSearch');
-    // express = require('express'),
-    // app = express();
+    elasticSearch = require('elasticSearch'),
+    bodyParser = require("body-parser");
 
+var app = express();
 
-// app.use('/static', express.static(__dirname + '/public'));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(express.static(__dirname + '/public'));
 
-// app.get('/',function(req,res){
-//     res.sendFile(__dirname + '/helloworldmap.html');
-// });
+// create client for elastic search
+var client = new elasticSearch.Client({
+    host: 'search-candidates-cjppiuv3s4xsksv4prai7gcohm.us-west-2.es.amazonaws.com',
+    log: 'trace'
+});
 
-app.listen(3000);
+// handle requests for specific candidates and all candidates
+app.post('/getTweets',function(req,res) {
+    var candidate = req.body.candidate;
+    console.log(candidate);
+    if (candidate == "All Candidates") {
+        console.log("test");
+        client.search({
+          index: 'candidates2',
+          size: 10000,
+          body: {
+              query : {
+                  match_all : {}
+              }
+          }
+        }, function (error, response) {
+            res.json(response);
+        });        console.log("Candidate name = "+candidate);
+    } else {
+        client.search({
+            index: 'candidates2',
+            size: 10000,
+            body: {
+                  query : {
+                      match : {
+                          text: candidate
+                      }
+                  }
+
+              }
+            }, function (error, response) {
+                res.json(response);
+        });
+    }
+});
+
+app.listen(process.env.PORT || 3000);
 // Setup twitter stream api
 var twit = new twitter({
     consumer_key: 'cu607zV20zgS5deVCjJphwFfc',
@@ -21,11 +60,6 @@ var twit = new twitter({
     access_token_secret: '3bSwrTiH5ukl3L3lXMfY1zFjB1x6GOUR9DIeLW0zb8vPQ'
 }),
 stream = null;
-
-var client = new elasticSearch.Client({
-    host: 'search-candidates-cjppiuv3s4xsksv4prai7gcohm.us-west-2.es.amazonaws.com',
-    log: 'trace'
-});
 
 //Create web sockets connection.
 twit.stream('statuses/filter', { track: ['Trump', 'Clinton', 'Sanders', 'Ted Cruz', 'Marco Rubio', 'Ben Carson', 'Kasich', 'Jeb Bush', 'Carly Fiorina', 'Mike Huckabee'] }, function(stream) {
