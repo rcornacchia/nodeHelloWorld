@@ -41,3 +41,10 @@ twit.stream('statuses/filter', { track: ['Trump', 'Clinton', 'Sanders', 'Ted Cru
         }
     });
 });
+
+//TODO add get request
+//get candidate_name, and query the elasticsearch db with candidate_name
+//upon response return json to client
+
+// TODO add get request
+// get tweets within geolocation
