@@ -86,11 +86,17 @@ function initMap() {
         // position: position_options,
         // map: map
     });
-    google.maps.event.addListener(marker, "click", function (event) {
-        console.log('test');
-        var latitude = event.latLng.lat();
-        var longitude = event.latLng.lng();
-        console.log( latitude + ', ' + longitude );
+    // google.maps.event.addListener(marker, "click", function (event) {
+    //     console.log('test');
+    //     var latitude = event.latLng.lat();
+    //     var longitude = event.latLng.lng();
+    //     console.log( latitude + ', ' + longitude );
+    // });
+    google.maps.event.addListener(map, "click", function(event) {
+        var lat = event.latLng.lat();
+        var lng = event.latLng.lng();
+        // populate yor box/field with lat, lng
+        console.log("Lat=" + lat + "; Lng=" + lng);
     });
     // fetch all tweets
     var candidate = "All Candidates";
