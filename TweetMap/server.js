@@ -32,7 +32,51 @@ app.post('/getTweets',function(req,res) {
           }
         }, function (error, response) {
             res.json(response);
-        });        console.log("Candidate name = "+candidate);
+        });
+        console.log("Candidate name = "+candidate);
+    } else {
+        client.search({
+            index: 'candidates2',
+            size: 10000,
+            body: {
+                  query : {
+                      match : {
+                          text: candidate
+                      }
+                  }
+
+              }
+            }, function (error, response) {
+                res.json(response);
+        });
+    }
+});
+
+// handle requests for candidates + location
+app.post('/getTweetsWithLocation', function(req,res) {
+    var candidate = req.body.candidate;
+    var lat = req.body.lat;
+    var lng = req.body.lng;
+    console.log(candidate + " lat: " + lat + " lng: " + lng);
+    if (candidate == "All Candidates") {
+        console.log("test");
+        client.search({
+            index: 'candidates2',
+            body: {
+                  filter: {
+                      geo_distance: {
+                           distance: '2000km',
+                           location: {
+                               lat: lat,
+                               lon: lng
+                           }
+                      }
+                 }
+           }
+        }, function (error, response) {
+            res.json(response);
+        });
+        console.log("Candidate name = "+candidate);
     } else {
         client.search({
             index: 'candidates2',
