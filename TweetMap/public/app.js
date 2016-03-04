@@ -13,7 +13,9 @@ function mapTweets(data) {
     for(var i=0; i<obj.hits.hits.length; i++){
         tweets.push([obj.hits.hits[i]._source.location, obj.hits.hits[i]._source.text]);
     }
+    console.log(tweets.length);
     tweets.forEach(function(tweet) {
+        console.log(tweet[1]);
         var position_options = {
             lat: parseFloat(tweet[0].lat),
             lng: parseFloat(tweet[0].lon)
@@ -47,10 +49,10 @@ function initMap() {
         var lat = event.latLng.lat();
         var lng = event.latLng.lng();
         console.log("Lat=" + lat + "; Lng=" + lng);
+        map.clearOverlays();
 
         // request
         $.post("http://localhost:3000/getTweetsWithLocation",{candidate: currentCandidate, lat: lat, lng: lng}, function(data){
-            map.clearOverlays();
             mapTweets(data);
         });
     });

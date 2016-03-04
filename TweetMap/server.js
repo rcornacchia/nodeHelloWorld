@@ -20,9 +20,8 @@ app.post('/getTweets',function(req,res) {
     var candidate = req.body.candidate;
     console.log(candidate);
     if (candidate == "All Candidates") {
-        console.log("test");
         client.search({
-          index: 'candidateindex',
+          index: 'lastindex',
           size: 10000,
           body: {
               query : {
@@ -35,7 +34,7 @@ app.post('/getTweets',function(req,res) {
         console.log("Candidate name = "+candidate);
     } else {
         client.search({
-            index: 'candidateindex',
+            index: 'lastindex',
             size: 10000,
             body: {
                   query : {
@@ -55,19 +54,15 @@ app.post('/getTweetsWithLocation', function(req,res) {
     var candidate = req.body.candidate;
     var lat = req.body.lat;
     var lng = req.body.lng;
-    console.log(candidate + " lat: " + lat + " lng: " + lng);
     if (candidate == "All Candidates") {
-        console.log("test");
         client.search({
-            index: 'candidateindex',
+            index: 'lastindex',
             size: 10000,
             body: {
                 query: {
                     filtered: {
                         query : {
-                            match : {
-                                text: candidate
-                            }
+                            match_all : {}
                         },
                         filter: {
                             geo_distance: {
@@ -87,7 +82,7 @@ app.post('/getTweetsWithLocation', function(req,res) {
         console.log("Candidate name = "+candidate);
     } else {
         client.search({
-            index: 'candidateindex',
+            index: 'lastindex',
             size: 10000,
             body: {
                 query: {
@@ -125,8 +120,8 @@ var twit = new twitter({
 }),
 stream = null;
 
-client.indices.exists({
-    index: 'candidateindex',
+client.indices.create({
+    index: 'lastindex',
     body: {
         mappings: {
             candidateTweet: {
@@ -140,49 +135,45 @@ client.indices.exists({
     }
 })
 
-client.search({
-    index: 'candidates',
-    size: 10000,
-    body: {
-        query: {
-          filtered: {
-                query : {
-                    match_all: {}
-                },
-            }
-        }
-    }
-}, function (error, response) {
-    console.log("test");
-    data = response;
-    tweets = [];
-    obj = data;
-    var lat, lng, text;
-    console.log("response: " + obj.hits.hits);
-    for(var i=0; i<obj.hits.hits.length; i++){
-        tweets.push([obj.hits.hits[i]._source.location, obj.hits.hits[i]._source.text]);
-    }
-    tweets.forEach(function(tweet) {
-        console.log("test   fff");
-        lat = parseFloat(tweet[0].lat);
-        lng = parseFloat(tweet[0].lon);
-        text = tweet[1];
-        console.log(text + " lat: " + lat + " lat: " + lng);
-    });
-    client.create({
-        index: 'candidateindex',
-        type: 'candidateTweet',
-        body: {
-            text: text,
-            location: {
-                "lat": lng,
-                "lon": lng
-            }
-        }
-    }, function (error, response) {
-        console.log("inserted record");
-    });
-});
+// client.search({
+//     index: 'candidates2',
+//     size: 10000,
+//     body: {
+//         query: {
+//           filtered: {
+//                 query : {
+//                     match_all: {}
+//                 },
+//             }
+//         }
+//     }
+// }, function (error, response) {
+//     data = response;
+//     tweets = [];
+//     obj = data;
+//     var lat, lng, text;
+//     for(var i=0; i<obj.hits.hits.length; i++){
+//         tweets.push([obj.hits.hits[i]._source.location, obj.hits.hits[i]._source.text]);
+//     }
+//     tweets.forEach(function(tweet) {
+//         lat = parseFloat(tweet[0].lat);
+//         lng = parseFloat(tweet[0].lon);
+//         text = tweet[1];
+//         console.log(text + " lat: " + lat + " lat: " + lng);
+//         client.create({
+//             index: 'lastindex',
+//             type: 'candidateTweet',
+//             body: {
+//                 text: text,
+//                 location: {
+//                     "lat": lat,
+//                     "lon": lng
+//                 }
+//             }
+//         }, function (error, response) {
+//         });
+//     });
+// });
 
 //Create web sockets connection.
 twit.stream('statuses/filter', {
@@ -192,7 +183,7 @@ twit.stream('statuses/filter', {
         if (data.geo) {
             console.log(data.place.full_name, data.text, data.geo.coordinates[0], data.geo.coordinates[1]);
             client.create({
-                index: 'candidateindex',
+                index: 'lastindex',
                 id: data.id,
                 type: 'candidateTweet',
                 body: {
