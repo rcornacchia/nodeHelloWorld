@@ -26,7 +26,6 @@ function mapTweets(data) {
             map: map
         });
         gMarkers.push(marker);
-
         google.maps.event.addListener(marker, 'click', (function () {
             infowindow.open(map, marker);
         }));
@@ -51,7 +50,7 @@ function initMap() {
 
         // request
         $.post("http://localhost:3000/getTweetsWithLocation",{candidate: currentCandidate, lat: lat, lng: lng}, function(data){
-            console.log("test");
+            map.clearOverlays();
             mapTweets(data);
         });
     });

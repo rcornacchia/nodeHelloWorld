@@ -22,7 +22,7 @@ app.post('/getTweets',function(req,res) {
     if (candidate == "All Candidates") {
         console.log("test");
         client.search({
-          index: 'candidates2',
+          index: 'candidateindex',
           size: 10000,
           body: {
               query : {
@@ -35,7 +35,7 @@ app.post('/getTweets',function(req,res) {
         console.log("Candidate name = "+candidate);
     } else {
         client.search({
-            index: 'candidates2',
+            index: 'candidateindex',
             size: 10000,
             body: {
                   query : {
@@ -43,7 +43,6 @@ app.post('/getTweets',function(req,res) {
                           text: candidate
                       }
                   }
-
               }
             }, function (error, response) {
                 res.json(response);
@@ -60,23 +59,27 @@ app.post('/getTweetsWithLocation', function(req,res) {
     if (candidate == "All Candidates") {
         console.log("test");
         client.search({
-            index: 'candidates2',
-            type: 'geo_point',
+            index: 'candidateindex',
+            size: 10000,
             body: {
-                size: 10000,
                 query: {
-                  filtered: {
-                          filter: {
-                              geo_distance: {
-                                  distance: '100000km',
-                                  coordinates: {
-                                      lat: lat,
-                                      lon: lng
-                                  }
-                              }
-                          }
-                      }
-                  }
+                    filtered: {
+                        query : {
+                            match : {
+                                text: candidate
+                            }
+                        },
+                        filter: {
+                            geo_distance: {
+                                distance: '1000km',
+                                location: {
+                                    lat: lat,
+                                    lon: lng
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }, function (error, response) {
             res.json(response);
@@ -84,22 +87,35 @@ app.post('/getTweetsWithLocation', function(req,res) {
         console.log("Candidate name = "+candidate);
     } else {
         client.search({
-            index: 'candidates2',
+            index: 'candidateindex',
             size: 10000,
             body: {
-                query : {
-                      match : {
-                          text: candidate
+                query: {
+                  filtered: {
+                        query : {
+                            match_all: {}
+                        },
+                      filter: {
+                          geo_distance: {
+                              distance: '1000km',
+                              location: {
+                                  lat: lat,
+                                  lon: lng
+                              }
+                          }
                       }
+                    }
                   }
-              }
-            }, function (error, response) {
-                res.json(response);
+            }
+        }, function (error, response) {
+            res.json(response);
         });
     }
 });
 
+// listen on port 3000 or env port
 app.listen(process.env.PORT || 3000);
+
 // Setup twitter stream api
 var twit = new twitter({
     consumer_key: 'cu607zV20zgS5deVCjJphwFfc',
@@ -109,15 +125,76 @@ var twit = new twitter({
 }),
 stream = null;
 
+client.indices.exists({
+    index: 'candidateindex',
+    body: {
+        mappings: {
+            candidateTweet: {
+                properties: {
+                    location: {
+                        type: 'geo_point'
+                    }
+                }
+            }
+        }
+    }
+})
+
+client.search({
+    index: 'candidates',
+    size: 10000,
+    body: {
+        query: {
+          filtered: {
+                query : {
+                    match_all: {}
+                },
+            }
+        }
+    }
+}, function (error, response) {
+    console.log("test");
+    data = response;
+    tweets = [];
+    obj = data;
+    var lat, lng, text;
+    console.log("response: " + obj.hits.hits);
+    for(var i=0; i<obj.hits.hits.length; i++){
+        tweets.push([obj.hits.hits[i]._source.location, obj.hits.hits[i]._source.text]);
+    }
+    tweets.forEach(function(tweet) {
+        console.log("test   fff");
+        lat = parseFloat(tweet[0].lat);
+        lng = parseFloat(tweet[0].lon);
+        text = tweet[1];
+        console.log(text + " lat: " + lat + " lat: " + lng);
+    });
+    client.create({
+        index: 'candidateindex',
+        type: 'candidateTweet',
+        body: {
+            text: text,
+            location: {
+                "lat": lng,
+                "lon": lng
+            }
+        }
+    }, function (error, response) {
+        console.log("inserted record");
+    });
+});
+
 //Create web sockets connection.
-twit.stream('statuses/filter', { track: ['Trump', 'Clinton', 'Sanders', 'Ted Cruz', 'Marco Rubio', 'Ben Carson', 'Kasich', 'Jeb Bush', 'Carly Fiorina', 'Mike Huckabee'] }, function(stream) {
+twit.stream('statuses/filter', {
+    track: ['Trump', 'Clinton', 'Sanders', 'Ted Cruz', 'Marco Rubio', 'Ben Carson', 'Kasich', 'Jeb Bush', 'Carly Fiorina', 'Mike Huckabee']
+}, function(stream) {
     stream.on('data', function (data) {
         if (data.geo) {
             console.log(data.place.full_name, data.text, data.geo.coordinates[0], data.geo.coordinates[1]);
             client.create({
-                index: 'candidates2',
-                type: 'geo_point',
+                index: 'candidateindex',
                 id: data.id,
+                type: 'candidateTweet',
                 body: {
                     text: data.text,
                     location: {
