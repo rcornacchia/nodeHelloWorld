@@ -3,7 +3,6 @@ var express = require('express'),
     twitter = require('ntwitter'),
     elasticSearch = require('elasticSearch'),
     bodyParser = require("body-parser");
-
 var app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -62,17 +61,23 @@ app.post('/getTweetsWithLocation', function(req,res) {
         console.log("test");
         client.search({
             index: 'candidates2',
+            type: 'geo_point',
             body: {
-                  filter: {
-                      geo_distance: {
-                           distance: '2000km',
-                           location: {
-                               lat: lat,
-                               lon: lng
-                           }
+                size: 10000,
+                query: {
+                  filtered: {
+                          filter: {
+                              geo_distance: {
+                                  distance: '100000km',
+                                  coordinates: {
+                                      lat: lat,
+                                      lon: lng
+                                  }
+                              }
+                          }
                       }
-                 }
-           }
+                  }
+            }
         }, function (error, response) {
             res.json(response);
         });
@@ -82,7 +87,7 @@ app.post('/getTweetsWithLocation', function(req,res) {
             index: 'candidates2',
             size: 10000,
             body: {
-                  query : {
+                query : {
                       match : {
                           text: candidate
                       }
@@ -110,16 +115,16 @@ twit.stream('statuses/filter', { track: ['Trump', 'Clinton', 'Sanders', 'Ted Cru
         if (data.geo) {
             console.log(data.place.full_name, data.text, data.geo.coordinates[0], data.geo.coordinates[1]);
             client.create({
-              index: 'candidates2',
-              type: 'geo_point',
-              id: data.id,
-              body: {
-                  text: data.text,
-                  location: {
-                      "lat": data.geo.coordinates[0],
-                      "lon": data.geo.coordinates[1]
-                  }
-              }
+                index: 'candidates2',
+                type: 'geo_point',
+                id: data.id,
+                body: {
+                    text: data.text,
+                    location: {
+                        "lat": data.geo.coordinates[0],
+                        "lon": data.geo.coordinates[1]
+                    }
+                }
             }, function (error, response) {
                 console.log("inserted record");
             });
