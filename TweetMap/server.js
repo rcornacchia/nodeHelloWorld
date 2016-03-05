@@ -1,6 +1,6 @@
 // Setup web server and socket
 var express = require('express'),
-    twitter = require('ntwitter'),
+    twitter = require('twitter'),
     elasticSearch = require('elasticSearch'),
     bodyParser = require("body-parser");
 var app = express();
