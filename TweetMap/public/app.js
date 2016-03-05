@@ -52,12 +52,12 @@ function initMap() {
         map.clearOverlays();
 
         // request
-        $.post("http://localhost:3000/getTweetsWithLocation",{candidate: currentCandidate, lat: lat, lng: lng}, function(data){
+        $.post("http://localhost:8081/getTweetsWithLocation",{candidate: currentCandidate, lat: lat, lng: lng}, function(data){
             mapTweets(data);
         });
     });
     // fetch all tweets
-    $.post("http://localhost:3000/getTweets",{candidate: currentCandidate}, function(data){
+    $.post("http://localhost:8081/getTweets",{candidate: currentCandidate}, function(data){
         mapTweets(data);
     });
     // delete marker function
@@ -74,7 +74,7 @@ $(document).ready(function(){
         // delete existing markers
         map.clearOverlays();
         var currentCandidate = $(this).text();
-        $.post("http://localhost:3000/getTweets",{candidate: currentCandidate}, function(data){
+        $.post("http://localhost:8081/getTweets",{candidate: currentCandidate}, function(data){
             mapTweets(data);
         });
     });
