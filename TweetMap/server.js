@@ -21,7 +21,7 @@ app.post('/getTweets',function(req,res) {
     console.log(candidate);
     if (candidate == "All Candidates") {
         client.search({
-          index: 'lastindex',
+          index: 'geoindex',
           size: 10000,
           body: {
               query : {
@@ -34,7 +34,7 @@ app.post('/getTweets',function(req,res) {
         console.log("Candidate name = "+candidate);
     } else {
         client.search({
-            index: 'lastindex',
+            index: 'geoindex',
             size: 10000,
             body: {
                   query : {
@@ -42,9 +42,9 @@ app.post('/getTweets',function(req,res) {
                           text: candidate
                       }
                   }
-              }
-            }, function (error, response) {
-                res.json(response);
+            }
+        }, function (error, response) {
+            res.json(response);
         });
     }
 });
@@ -56,7 +56,7 @@ app.post('/getTweetsWithLocation', function(req,res) {
     var lng = req.body.lng;
     if (candidate == "All Candidates") {
         client.search({
-            index: 'lastindex',
+            index: 'geoindex',
             size: 10000,
             body: {
                 query: {
@@ -82,7 +82,7 @@ app.post('/getTweetsWithLocation', function(req,res) {
         console.log("Candidate name = "+candidate);
     } else {
         client.search({
-            index: 'lastindex',
+            index: 'geoindex',
             size: 10000,
             body: {
                 query: {
@@ -109,7 +109,7 @@ app.post('/getTweetsWithLocation', function(req,res) {
 });
 
 // listen on port 3000 or env port
-app.listen(process.env.PORT || 3000);
+app.listen(process.env.PORT || 8081);
 
 // Setup twitter stream api
 var twit = new twitter({
@@ -120,21 +120,49 @@ var twit = new twitter({
 }),
 stream = null;
 
-client.indices.create({
-    index: 'lastindex',
-    body: {
-        mappings: {
-            candidateTweet: {
-                properties: {
+// // create index
+// client.indices.create({
+//     index: 'geoindex',
+//     body: {
+//         mappings: {
+//             candidateTweet: {
+//                 properties: {
+//                     location: {
+//                         type: 'geo_point'
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// });
+
+
+//Create web sockets connection.
+twit.stream('statuses/filter', {
+    track: ['Trump', 'Clinton', 'Sanders', 'Ted Cruz', 'Marco Rubio', 'Ben Carson', 'Kasich', 'Jeb Bush', 'Carly Fiorina', 'Mike Huckabee']
+}, function(stream) {
+    stream.on('data', function (data) {
+        if (data.geo) {
+            console.log(data.place.full_name, data.text, data.geo.coordinates[0], data.geo.coordinates[1]);
+            client.create({
+                index: 'geoindex',
+                id: data.id,
+                type: 'candidateTweet',
+                body: {
+                    text: data.text,
                     location: {
-                        type: 'geo_point'
+                        "lat": data.geo.coordinates[0],
+                        "lon": data.geo.coordinates[1]
                     }
                 }
-            }
+            }, function (error, response) {
+                console.log("inserted record");
+            });
         }
-    }
-})
+    });
+});
 
+// // code used to migrate indices
 // client.search({
 //     index: 'candidates2',
 //     size: 10000,
@@ -161,7 +189,7 @@ client.indices.create({
 //         text = tweet[1];
 //         console.log(text + " lat: " + lat + " lat: " + lng);
 //         client.create({
-//             index: 'lastindex',
+//             index: 'geoindex',
 //             type: 'candidateTweet',
 //             body: {
 //                 text: text,
@@ -175,30 +203,7 @@ client.indices.create({
 //     });
 // });
 
-//Create web sockets connection.
-twit.stream('statuses/filter', {
-    track: ['Trump', 'Clinton', 'Sanders', 'Ted Cruz', 'Marco Rubio', 'Ben Carson', 'Kasich', 'Jeb Bush', 'Carly Fiorina', 'Mike Huckabee']
-}, function(stream) {
-    stream.on('data', function (data) {
-        if (data.geo) {
-            console.log(data.place.full_name, data.text, data.geo.coordinates[0], data.geo.coordinates[1]);
-            client.create({
-                index: 'lastindex',
-                id: data.id,
-                type: 'candidateTweet',
-                body: {
-                    text: data.text,
-                    location: {
-                        "lat": data.geo.coordinates[0],
-                        "lon": data.geo.coordinates[1]
-                    }
-                }
-            }, function (error, response) {
-                console.log("inserted record");
-            });
-        }
-    });
-});
+
 
 //TODO add get request
 //get candidate_name, and query the elasticsearch db with candidate_name
